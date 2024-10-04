@@ -3,7 +3,7 @@
 
 #define TILE_WIDTH 16
 
-// CUDA kernel for matrix multiplication
+// CUDA kernel 
 __global__ void matrixMulKernel(float *A, float *B, float *C, int N) {
     __shared__ float tileA[TILE_WIDTH][TILE_WIDTH];
     __shared__ float tileB[TILE_WIDTH][TILE_WIDTH];
@@ -13,7 +13,7 @@ __global__ void matrixMulKernel(float *A, float *B, float *C, int N) {
     float sum = 0.0;
 
     for (int tile = 0; tile < (N / TILE_WIDTH); ++tile) {
-        // Load tiles into shared memory
+        // Loading tile method into mem
         tileA[threadIdx.y][threadIdx.x] = A[row * N + (tile * TILE_WIDTH + threadIdx.x)];
         tileB[threadIdx.y][threadIdx.x] = B[(tile * TILE_WIDTH + threadIdx.y) * N + col];
         __syncthreads();
@@ -44,13 +44,35 @@ void matrixMul(float *h_A, float *h_B, float *h_C, int N) {
     dim3 dimBlock(TILE_WIDTH, TILE_WIDTH, 1);
     dim3 dimGrid((N + TILE_WIDTH - 1) / TILE_WIDTH, (N + TILE_WIDTH - 1) / TILE_WIDTH, 1);
 
+    
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    
+    cudaEventRecord(start, 0);
+
+    
     matrixMulKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, N);
 
+    
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+
+   
+    float elapsedTime;
+    cudaEventElapsedTime(&elapsedTime, start, stop);
+
+    printf("Time taken for matrix multiplication: %f ms\n", elapsedTime);
+
+    
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
 
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
 }
 
 int main() {
@@ -68,10 +90,6 @@ int main() {
     }
 
     matrixMul(h_A, h_B, h_C, N);
-
-    // Print a portion of the result
-    printf("Result matrix C[0][0]: %f\n", h_C[0]);
-
     free(h_A);
     free(h_B);
     free(h_C);
