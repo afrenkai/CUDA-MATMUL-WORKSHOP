@@ -1,7 +1,9 @@
+import random
+import time
 from typing import List
 Matrix = List[List[int]]
 
-def is_matrix(matrix: Matrix): bool:
+def is_matrix(matrix: Matrix) -> bool:
     if not matrix or not matrix[0]:
         return False
 
@@ -12,24 +14,23 @@ def is_matrix(matrix: Matrix): bool:
 
     return True
 
-
 def MatMul(A: Matrix, B: Matrix) -> List[List[int]]:
     if not is_matrix(A) or not is_matrix(B):
-        raise ValueError("One or More of the Matrices is not properly sized")
-    m = len(A) # n rows in A
-    n = len(A[0]) # n cols in A and rows in B
-    p = len(B[0]) # n cols in B
+        raise ValueError("One or more of the matrices is not properly sized")
 
+    m = len(A)    # Number of rows in A
+    n = len(A[0]) # Number of columns in A and rows in B
+    p = len(B[0]) # Number of columns in B
+
+    # Initialize result matrix C with zeros
     C = []
-    for x in range (m):
+    for x in range(m):
         row = []
         for j in range(p):
             row.append(0)
         C.append(row)
 
-    
-    # C = [[0 for x in range (p)] for y in range (m)]
-
+    # Perform matrix multiplication
     for i in range(m):
         for j in range(p):
             for k in range(n):
@@ -37,32 +38,41 @@ def MatMul(A: Matrix, B: Matrix) -> List[List[int]]:
 
     return C
 
-A = [[0, 2, 3, 9, 7, 3], [7, 0, 5, 6, 5, 4], [4, 2, 8, 7, 0, 0],[1, 4, 6, 8, 3, 7], [7, 4, 7, 5, 1, 8], [3, 8, 5, 8, 9, 4]]
-B = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15], [16, 17, 18]]
-def run(A, B) -> None:
-    # Checking A
+def run() -> None:
+    # Generate two 1024 x 1024 random matrices
+    size = 1024
+    A = []
+    B = []
 
+    for i in range(size):
+        row_A = []
+        row_B = []
+        for j in range(size):
+            row_A.append(random.randint(0, 100))
+            row_B.append(random.randint(0, 100))
+        A.append(row_A)
+        B.append(row_B)
+
+    # Checking A and B
     if is_matrix(A):
         print("A is a valid matrix")
     else:
         print("A is not a valid matrix")
 
-
-    #Checking B
-
-
     if is_matrix(B):
-        print('B is a valid Matrix')
+        print("B is a valid matrix")
     else:
-        print('B is not a valid Matrix')
+        print("B is not a valid matrix")
 
-
+    # Measure time for matrix multiplication
     if is_matrix(A) and is_matrix(B):
-        res = MatMul(A,B)
-        print(res)
+        start_time = time.time()
+        res = MatMul(A, B)
+        end_time = time.time()
+        print(f"Matrix multiplication took {end_time - start_time} seconds")
     else:
         print("One of the matrices is invalid, check the prior console output")
 
 
-if name = "__main__":
-    run(A, B)
+if __name__ == "__main__":
+    run()
